@@ -6,14 +6,13 @@ server_address = ('127.0.0.1', 5000)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect(server_address)
 
-print("Enter mathematical operations (e.g., 3*5, 7/2, 6-4)")
 sys.stdout.write('>> ')
 
 try:
     while True:
         message = str(input())
         if not re.match(r'^\s*\d+\s*[\+\-\*\/]\s*\d+\s*$', message):
-            print("Invalid format! Use format: number operator number (e.g., 3 * 5)")
+            print("Invalid format")
             sys.stdout.write('>> ')
             continue
             
