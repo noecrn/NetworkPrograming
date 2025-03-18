@@ -12,9 +12,8 @@ sys.stdout.write('>> ')
 try:
     while True:
         message = str(input())
-        # Validate input format using regex
-        if not re.match(r'^\d+[\+\-\*\/]\d+$', message):
-            print("Invalid format! Use format: number operator number (e.g., 3*5)")
+        if not re.match(r'^\s*\d+\s*[\+\-\*\/]\s*\d+\s*$', message):
+            print("Invalid format! Use format: number operator number (e.g., 3 * 5)")
             sys.stdout.write('>> ')
             continue
             

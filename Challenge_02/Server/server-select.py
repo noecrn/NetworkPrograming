@@ -5,20 +5,12 @@ import re
 
 def calculate(expression):
     try:
-        if '+' in expression:
-            x, y = map(int, expression.split('+'))
-            return x + y
-        elif '-' in expression:
-            x, y = map(int, expression.split('-'))
-            return x - y
-        elif '*' in expression:
-            x, y = map(int, expression.split('*'))
-            return x * y
-        elif '/' in expression:
-            x, y = map(int, expression.split('/'))
-            if y == 0:
-                return "Error: Division by zero"
-            return x / y
+        if not re.match(r'^[\d\+\-\*\/\s]+$', expression):
+            return "Error: Invalid characters in expression"
+        result = eval(expression)
+        return result
+    except ZeroDivisionError:
+        return "Error: Division by zero"
     except:
         return "Error: Invalid operation"
 
