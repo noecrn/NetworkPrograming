@@ -1,0 +1,86 @@
+[2025-03-25 16:55:38] Client 123 registered
+[2025-03-25 16:56:44] Client 123 registered
+[2025-03-25 16:58:22] Client 123 registered
+[2025-03-25 16:58:25] Receiving file /Users/noecrn/Documents/NetworkPrograming/Challenge6_Group08/ClientA/file_to_send.txt from 123
+[2025-03-25 16:58:25] File /Users/noecrn/Documents/NetworkPrograming/Challenge6_Group08/ClientA/file_to_send.txt delivery status:
+[2025-03-25 17:01:11] Client 123 registered
+[2025-03-25 17:01:20] Receiving file file_to_send.txt from 123
+[2025-03-25 17:01:20] File file_to_send.txt delivery status:
+[2025-03-25 17:04:15] Receiving file file_to_send.txt from 123
+[2025-03-25 17:04:15] File file_to_send.txt delivery status:
+[2025-03-25 17:07:11] Client 123 registered
+[2025-03-25 17:07:19] Receiving file file_to_send.txt from 123
+[2025-03-25 17:07:19] File file_to_send.txt delivery status:
+[2025-03-25 17:11:13] Client 123 registered
+[2025-03-25 17:11:21] Receiving file file_to_send.txt from 123
+[2025-03-25 17:15:27] 🚀 File Server is running...
+[2025-03-25 17:15:32] Client A registered
+[2025-03-25 17:15:40] 📤 Client A sending file_to_send.txt (78 bytes)
+[2025-03-25 17:20:53] 🚀 File Server is running...
+[2025-03-25 17:21:00] Client A registered
+[2025-03-25 17:21:10] 📤 Client A sending file_to_send.txt (78 bytes)
+[2025-03-25 17:21:10] ⏳ Receiving from A: 100.0%
+[2025-03-25 17:21:10] ✅ Received complete file from A
+[2025-03-25 17:21:10] ℹ️ No other clients connected
+[2025-03-25 17:21:16] Client B registered
+[2025-03-25 17:21:32] Client A disconnected
+[2025-03-25 17:21:36] Client B disconnected
+[2025-03-25 17:21:40] 🚀 File Server is running...
+[2025-03-25 17:21:46] Client A registered
+[2025-03-25 17:21:48] Client B registered
+[2025-03-25 17:21:52] 📤 Client A sending file_to_send.txt (78 bytes)
+[2025-03-25 17:21:52] ⏳ Receiving from A: 100.0%
+[2025-03-25 17:21:52] ✅ Received complete file from A
+[2025-03-25 17:21:52] 📩 Forwarding to 1 clients: B
+[2025-03-25 17:21:52] 📤 Sending to B: FILE:file_to_send.txt:78:A
+[2025-03-25 17:21:53] ⏳ Waiting for ACK from B
+[2025-03-25 17:26:34] 🚀 File Server is running...
+[2025-03-25 17:26:47] Client A registered
+[2025-03-25 17:26:49] Client B registered
+[2025-03-25 17:26:59] 📤 Client A sending file_to_send.txt (78 bytes)
+[2025-03-25 17:27:00] ⏳ Receiving from A: 100.0%
+[2025-03-25 17:27:00] ✅ Received complete file from A
+[2025-03-25 17:27:00] 📩 Forwarding to 1 clients: B
+[2025-03-25 17:27:00] 📤 Sending to B: FILE:file_to_send.txt:78:A
+[2025-03-25 17:27:00] ⏳ Waiting for ACK from B
+[2025-03-25 17:27:10] Error handling client ('127.0.0.1', 57877): timed out
+[2025-03-25 17:27:10] ❌ Timeout waiting for B
+[2025-03-25 17:27:10] 📊 File file_to_send.txt delivery summary: 0/1 successful
+[2025-03-25 17:27:10] Client B disconnected
+[2025-03-25 17:30:42] 🛑 Shutting down server...
+[2025-03-25 17:30:42] 👋 Closing connection to A
+[2025-03-25 17:30:42] ✅ Server shutdown complete
+[2025-03-25 17:30:42] 🛑 Shutting down server...
+[2025-03-25 17:30:42] ✅ Server shutdown complete
+[2025-03-25 17:30:46] 🚀 File Server is running...
+[2025-03-25 17:30:55] Client A registered
+[2025-03-25 17:30:56] Client B registered
+[2025-03-25 17:31:11] 📤 Client A sending file_to_send.txt (78 bytes)
+[2025-03-25 17:31:12] ⏳ Receiving from A: 100.0%
+[2025-03-25 17:31:12] ✅ Received complete file from A
+[2025-03-25 17:31:12] 📩 Forwarding to 1 clients: B
+[2025-03-25 17:31:12] 📤 Sending to B: FILE:file_to_send.txt:78:A
+[2025-03-25 17:31:12] ⏳ Waiting for ACK from B
+[2025-03-25 17:31:27] ❌ Timeout waiting for B
+[2025-03-25 17:31:27] 📊 File file_to_send.txt delivery summary: 0/1 successful
+[2025-03-25 17:31:27] Error handling client ('127.0.0.1', 58021): timed out
+[2025-03-25 17:31:27] Client B disconnected
+[2025-03-25 17:31:40] Client A disconnected
+[2025-03-25 17:31:45] 🛑 Shutting down server...
+[2025-03-25 17:31:45] ✅ Server shutdown complete
+[2025-03-25 17:31:45] 🛑 Shutting down server...
+[2025-03-25 17:31:45] ✅ Server shutdown complete
+[2025-03-25 17:39:26] 🚀 File Server is running...
+[2025-03-25 17:39:31] Client A registered
+[2025-03-25 17:39:33] Client B registered
+[2025-03-25 17:39:41] 📤 Client A sending file_to_send.txt (78 bytes)
+[2025-03-25 17:39:41] ⏳ Receiving from A: 100.0%
+[2025-03-25 17:39:41] ✅ Received complete file from A
+[2025-03-25 17:39:41] 📩 Forwarding to 1 clients: B
+[2025-03-25 17:39:41] 📤 Sending to B: FILE:file_to_send.txt:78:A
+[2025-03-25 17:39:41] ⏳ Waiting for ACK from B
+[2025-03-25 17:39:56] ⚠️ Retry 1 for B
+[2025-03-25 17:39:56] Error handling client ('127.0.0.1', 58351): timed out
+[2025-03-25 17:39:56] Client B disconnected
+[2025-03-25 17:39:57] ❌ Error sending to B: 'B'
+[2025-03-25 17:39:57] 📊 File file_to_send.txt delivery summary: 0/1 successful
