@@ -1,148 +1,190 @@
 import socket
-import os
 import threading
-import time
+import os
 import sys
+import time
 
-class FileClient:
-    def __init__(self, host='127.0.0.1', port=5555, max_retries=5):
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_address = (host, port)
-        self.connect_with_retry(max_retries)
-        self.client_id = input("Enter client ID: ")
-        self.received_dir = "received"
-        os.makedirs(self.received_dir, exist_ok=True)
-        self.transfer_timeout = 15.0  # Match server timeout
-        self.running = True
+# Global variables
+client_id = None
+running = False
+server_host = '127.0.0.1'
+server_port = 5555
+client_socket = None
 
-    def connect_with_retry(self, max_retries):
-        retries = 0
-        while retries < max_retries:
-            try:
-                print(f"Attempting to connect to server... (attempt {retries + 1}/{max_retries})")
-                self.client_socket.connect(self.server_address)
-                print("Connected to server successfully!")
-                return
-            except ConnectionRefusedError:
-                retries += 1
-                if retries == max_retries:
-                    print("Could not connect to server. Make sure the server is running.")
-                    sys.exit(1)
-                print("Connection failed. Retrying in 2 seconds...")
-                time.sleep(2)
-                self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def register(self):
-        self.client_socket.send(f"REGISTER:{self.client_id}".encode())
-        response = self.client_socket.recv(1024).decode()
-        print(response)
-
-    def send_file(self, filename):
+def receive_files():
+    """Continuously listen for incoming files"""
+    global running, client_socket, client_id
+    
+    # Utilisez un chemin absolu pour le dossier received
+    client_dir = os.path.dirname(os.path.abspath(__file__))
+    received_dir = os.path.join(client_dir, "received")
+    
+    # Assurez-vous que le dossier existe
+    os.makedirs(received_dir, exist_ok=True)
+    
+    while running:
         try:
-            if not os.path.exists(filename):
-                print(f"File {filename} not found")
-                return
-
-            filesize = os.path.getsize(filename)
-            if filesize > 2_000_000:  # 2MB limit
-                print("File too large (max 2MB)")
-                return
-
-            print(f"Sending file {filename} ({filesize} bytes)...")
-            self.client_socket.send(f"SEND:{os.path.basename(filename)}:{filesize}:{self.client_id}".encode())
-            time.sleep(0.1)
-
-            with open(filename, 'rb') as f:
-                data = f.read()
-                total_sent = 0
-                while total_sent < filesize:
-                    chunk_size = min(4096, filesize - total_sent)
-                    sent = self.client_socket.send(data[total_sent:total_sent + chunk_size])
-                    if sent == 0:
-                        raise RuntimeError("Socket connection broken")
-                    total_sent += sent
-                    print(f"Progress: {total_sent}/{filesize} bytes ({(total_sent/filesize)*100:.1f}%)", end='\r')
-
-            print(f"\nFile {filename} sent successfully")
-
-            # Set timeout for server responses
-            self.client_socket.settimeout(self.transfer_timeout)
-            try:
-                response = self.client_socket.recv(1024).decode()
-                if response.startswith("RECEIVED:"):
-                    print("Server received the file successfully")
+            data = client_socket.recv(1024).decode('utf-8')
+            if not data:
+                print("Connection to server lost.")
+                break
+            
+            if data.startswith('SEND:'):
+                parts = data.split(':')
+                if len(parts) < 5:
+                    continue
                 
-                response = self.client_socket.recv(1024).decode()
-                if response.startswith("STATUS:"):
-                    print(response[7:])
-                elif response.startswith("ERROR:"):
-                    print(f"Error: {response[6:]}")
-            finally:
-                self.client_socket.settimeout(None)
-
-        except Exception as e:
-            print(f"\nError sending file: {str(e)}")
-
-    def receive_files(self):
-        while self.running:
-            try:
-                message = self.client_socket.recv(1024).decode()
-                if not message:
-                    print("\nDisconnected from server")
-                    break
-
-                if message.startswith("FILE:"):
-                    _, filename, filesize, sender_id = message.split(":")
-                    filesize = int(filesize)
-                    print(f"\nReceiving file {filename} ({filesize} bytes) from {sender_id}...")
-                    
-                    file_data = bytearray()
-                    total_received = 0
-                    while total_received < filesize:
-                        chunk = self.client_socket.recv(min(4096, filesize - total_received))
-                        if not chunk:
-                            raise RuntimeError("Connection broken during file transfer")
-                        file_data.extend(chunk)
-                        total_received += len(chunk)
-                        print(f"Progress: {total_received}/{filesize} bytes ({(total_received/filesize)*100:.1f}%)", end='\r')
-
-                    save_path = os.path.join(self.received_dir, filename)
-                    with open(save_path, 'wb') as f:
-                        f.write(file_data)
-
-                    self.client_socket.send(f"ACK:{filename}:{self.client_id}".encode())
-                    print(f"\nFile saved as {save_path}")
-
-            except Exception as e:
-                if not self.running:
-                    break
-                print(f"\nError receiving file: {str(e)}")
-
-    def run(self):
-        self.register()
+                _, filename, filesize, sender_id, file_id = parts
+                filesize = int(filesize)
+                
+                print(f"Receiving {filename} from {sender_id}...")
+                
+                # Receive file data
+                file_data = b''
+                bytes_received = 0
+                
+                while bytes_received < filesize:
+                    chunk = client_socket.recv(min(4096, filesize - bytes_received))
+                    if not chunk:
+                        raise Exception("Connection closed during file transfer")
+                    file_data += chunk
+                    bytes_received += len(chunk)
+                
+                # Save file to received folder
+                # Add a suffix if file already exists
+                final_filename = filename
+                counter = 0
+                while os.path.exists(os.path.join(received_dir, final_filename)):
+                    counter += 1
+                    base_name, ext = os.path.splitext(filename)
+                    final_filename = f"{base_name}_{counter}{ext}"
+                
+                filepath = os.path.join(received_dir, final_filename)
+                with open(filepath, 'wb') as f:
+                    f.write(file_data)
+                
+                print(f"Received {filename} from {sender_id}")
+                print(f"Saved to {filepath}")
+                
+                # Send ACK to server with the file_id
+                client_socket.send(f"ACK:{file_id}:{client_id}".encode('utf-8'))
+                print(f"Sent acknowledgment for {filename}")
         
-        receive_thread = threading.Thread(target=self.receive_files)
+        except Exception as e:
+            print(f"Error receiving file: {e}")
+            running = False
+def send_file(filename):
+    """Send a file to the server for broadcasting"""
+    global client_socket, client_id
+    
+    if not client_id:
+        print("Not registered with server. Please register first.")
+        return False
+    
+    try:
+        # Get the directory where the client script is located
+        client_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Construct full path to the file in the client's directory
+        filepath = os.path.join(client_dir, filename)
+        
+        # Show paths for debugging
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"Client directory: {client_dir}")
+        print(f"Looking for file at: {filepath}")
+        
+        if not os.path.exists(filepath):
+            print(f"File {filename} not found.")
+            return False
+        
+        # Get file size
+        filesize = os.path.getsize(filepath)
+        if filesize > 2 * 1024 * 1024:  # 2MB limit
+            print("File size exceeds 2MB limit.")
+            return False
+        
+        # Send file metadata
+        client_socket.send(f"SEND:{os.path.basename(filename)}:{filesize}:{client_id}".encode('utf-8'))
+        
+        # Send file content
+        with open(filepath, 'rb') as f:
+            client_socket.sendall(f.read())
+        
+        print(f"Sent {filename} to server.")
+        return True
+    
+    except Exception as e:
+        print(f"Error sending file: {e}")
+        return False
+
+def register(entered_client_id):
+    """Register with the server using the provided client_id"""
+    global client_socket, client_id
+    
+    try:
+        client_socket.send(f"REGISTER:{entered_client_id}".encode('utf-8'))
+        response = client_socket.recv(1024).decode('utf-8')
+        print(response)
+        if "successful" in response.lower():
+            client_id = entered_client_id
+            return True
+        return False
+    except Exception as e:
+        print(f"Registration failed: {e}")
+        return False
+
+def main():
+    """Main function to start the client"""
+    global running, client_socket, server_host, server_port
+    
+    # Create received directory if it doesn't exist
+    os.makedirs("received", exist_ok=True)
+    
+    # Connect to server
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    try:
+        client_socket.connect((server_host, server_port))
+        print(f"Connected to server at {server_host}:{server_port}")
+        
+        # Register with server
+        entered_client_id = input("Enter client ID: ")
+        if not register(entered_client_id):
+            print("Failed to register with server. Exiting...")
+            client_socket.close()
+            return
+        
+        # Start file receiving thread
+        running = True
+        receive_thread = threading.Thread(target=receive_files)
         receive_thread.daemon = True
         receive_thread.start()
-
-        try:
-            while self.running:
-                command = input("Enter command (SEND <filename> or EXIT): ")
-                if command.lower() == 'exit':
-                    break
-                elif command.startswith('SEND '):
-                    filename = command[5:]
-                    self.send_file(filename)
-        except KeyboardInterrupt:
-            print("\nShutting down...")
-        finally:
-            self.running = False
-            try:
-                self.client_socket.shutdown(socket.SHUT_RDWR)
-            except:
-                pass
-            self.client_socket.close()
+        
+        # Command loop
+        print("\nCommands:")
+        print("SEND <filename> - Send a file to all other clients")
+        print("EXIT - Close the client")
+        
+        while True:
+            cmd = input("\nEnter command: ").strip()
+            
+            if cmd.lower() == 'exit':
+                break
+            
+            if cmd.lower().startswith('send '):
+                filename = cmd[5:].strip()
+                send_file(filename)
+            else:
+                print("Unknown command. Use 'SEND <filename>' or 'EXIT'")
+    
+    except KeyboardInterrupt:
+        print("\nClient shutting down...")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        running = False
+        if client_socket:
+            client_socket.close()
 
 if __name__ == "__main__":
-    client = FileClient()
-    client.run()
+    main()
