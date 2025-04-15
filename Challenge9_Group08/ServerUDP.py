@@ -1,6 +1,6 @@
 import socket
 
-server_address = ('0.0.0.0', 5000)
+server_address = ('127.0.0.1', 5000)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind(server_address)
 print("Server listening on port 5000...")

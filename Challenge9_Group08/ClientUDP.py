@@ -1,7 +1,7 @@
 import socket
 import os
 
-server_address = ('192.168.1.2', 5000)  # Change to actual server IP
+server_address = ('127.0.0.1', 5000)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Get file path from user
